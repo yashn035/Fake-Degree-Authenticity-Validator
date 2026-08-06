@@ -37,7 +37,12 @@ export default function Navbar({ darkMode, setDarkMode }) {
                                     <>
                                         <button 
                                             onClick={() => {
+                                                window.speechSynthesis.cancel();
                                                 const msg = new SpeechSynthesisUtterance("Welcome to the Edu Verify AI Demo. Upload a genuine certificate to see instant verification. Upload a tampered certificate to see the A.I. detect anomalies. View the admin dashboard for real-time fraud alerts and geographic analytics.");
+                                                const voices = window.speechSynthesis.getVoices();
+                                                if (voices.length > 0) {
+                                                    msg.voice = voices.find(v => v.lang.includes('en') && v.name.includes('Google')) || voices.find(v => v.lang.includes('en')) || voices[0];
+                                                }
                                                 window.speechSynthesis.speak(msg);
                                             }}
                                             className="flex items-center gap-1 text-purple-600 dark:text-purple-400 font-bold hover:text-purple-800 transition-colors bg-purple-50 dark:bg-purple-900/20 px-3 py-1.5 rounded-lg border border-purple-200 dark:border-purple-800"
