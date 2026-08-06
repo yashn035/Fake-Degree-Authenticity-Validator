@@ -1,0 +1,71 @@
+import { extractText } from '../services/ocrService.js';
+import { validateCertificate } from '../services/validationService.js';
+import { generateImageHash } from '../services/hashService.js';
+import { addVerificationLog } from './adminController.js';
+import fs from 'fs';
+
+export const handleUpload = async (req, res) => {
+    try {
+        if (!req.file) {
+            return res.status(400).json({ error: 'No file uploaded' });
+        }
+
+        const filePath = req.file.path;
+        
+        // 1. Run OCR
+        let extractedData = await extractText(filePath);
+        
+        // Mock fallback if OCR fails and ?mock=true is provided
+        if ((!extractedData || !extractedData.certId) && req.query.mock) {
+            extractedData = {
+                name: 'Anjali Kumar',
+                certId: 'C001',
+                institution: 'Ranchi University',
+                course: 'B.Sc',
+                marks: '78%',
+                year: '2022'
+            };
+        }
+
+        if (!extractedData) {
+            fs.unlinkSync(filePath);
+            return res.status(400).json({ error: 'Could not read certificate – please retry' });
+        }
+
+        // 2. Generate Image Hash
+        const imgHash = await generateImageHash(filePath);
+
+        // 3. Validate Data
+        const validationResult = await validateCertificate(extractedData, imgHash);
+
+        // 4. Log the result
+        const logData = {
+            certId: extractedData.certId || 'UNKNOWN',
+            name: extractedData.name || 'UNKNOWN',
+            verdict: validationResult.verdict,
+            extractedData,
+            timestamp: new Date().toISOString()
+        };
+        addVerificationLog(logData);
+
+        // Emit real-time event
+        import('../services/eventService.js').then(({ eventService }) => {
+            eventService.emitVerificationEvent(validationResult);
+        });
+
+        // Trigger fraud alert if tampered or blacklisted
+        if (validationResult.verdict === 'TAMPERED' || validationResult.verdict === 'BLACKLISTED') {
+            import('../services/alertService.js').then(({ alertService }) => {
+                alertService.sendAlert(validationResult.verdict, logData);
+            });
+        }
+
+        // 5. Cleanup
+        fs.unlinkSync(filePath);
+
+        res.json(validationResult);
+    } catch (error) {
+        console.error('Upload Error:', error);
+        res.status(500).json({ error: 'Internal server error during verification' });
+    }
+};
