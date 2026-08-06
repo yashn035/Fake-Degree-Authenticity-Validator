@@ -9,6 +9,8 @@ import InstitutionHeatmap from '../components/InstitutionHeatmap';
 import FraudTrendChart from '../components/FraudTrendChart';
 import FraudScoreDistribution from '../components/FraudScoreDistribution';
 import SuspiciousActivityTable from '../components/SuspiciousActivityTable';
+import FraudMap from '../components/FraudMap';
+import InstitutionLeaderboard from '../components/InstitutionLeaderboard';
 
 export default function AdminPage() {
   const [logs, setLogs] = useState([]);
@@ -140,7 +142,20 @@ export default function AdminPage() {
                             <button onClick={fetchExtraData} className="px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg flex items-center gap-2 hover:bg-slate-50 dark:hover:bg-slate-700 shadow-sm text-sm">
                                 <RefreshCw className="w-4 h-4 text-slate-500" /> Refresh
                             </button>
-                            <button onClick={() => alert('Report download simulating...')} className="px-3 py-2 bg-blue-600 text-white rounded-lg flex items-center gap-2 hover:bg-blue-700 shadow-sm text-sm font-medium">
+                            <button onClick={async () => {
+                                try {
+                                    const { exportData } = await import('../api/apiClient');
+                                    const data = await exportData();
+                                    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+                                    const url = URL.createObjectURL(blob);
+                                    const a = document.createElement('a');
+                                    a.href = url;
+                                    a.download = 'certificates_export.json';
+                                    a.click();
+                                } catch (err) {
+                                    alert('Export failed');
+                                }
+                            }} className="px-3 py-2 bg-blue-600 text-white rounded-lg flex items-center gap-2 hover:bg-blue-700 shadow-sm text-sm font-medium">
                                 <Download className="w-4 h-4" /> Export Report
                             </button>
                         </div>
@@ -171,6 +186,18 @@ export default function AdminPage() {
                             <h3 className="text-lg font-bold text-slate-800 dark:text-white mb-4">Recent Suspicious Activity</h3>
                             <SuspiciousActivityTable activities={analyticsData?.recentVerifications} />
                         </div>
+                    </div>
+
+                    <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">
+                        <h3 className="text-lg font-bold text-slate-800 dark:text-white mb-1">Geographic Fraud Distribution</h3>
+                        <p className="text-sm text-slate-500 mb-4">Regional simulation based on institution location.</p>
+                        <FraudMap data={logs} />
+                    </div>
+
+                    <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">
+                        <h3 className="text-lg font-bold text-slate-800 dark:text-white mb-1">Institution Scoreboard</h3>
+                        <p className="text-sm text-slate-500 mb-4">Top authentic vs top targeted institutions.</p>
+                        <InstitutionLeaderboard data={analyticsData?.leaderboard} />
                     </div>
                 </div>
             )}

@@ -19,7 +19,14 @@ class AlertService {
         // Simulate real-world dispatch
         console.log(`\n🚨 FRAUD ALERT TRIGGERED`);
         console.log(`📧 EMAIL: fraud-team@university.edu - ${alert.message}`);
-        console.log(`📱 SMS: +91-9876543210 - Alert for ${alert.certId} (${alertType})\n`);
+        console.log(`📱 WhatsApp Message Sent to +91-9876543210:
+    [EduVerify AI Bot]
+    🚨 FRAUD ALERT 🚨
+    Certificate: ${alert.certId}
+    Verdict: ${alertType}
+    Time: ${new Date(alert.timestamp).toLocaleString()}
+    Action Required: Review immediately in Admin Dashboard.`);
+        console.log(`✅ Message delivered (simulated)\n`);
     }
 
     getAlerts() {

@@ -35,6 +35,15 @@ export default function Navbar({ darkMode, setDarkMode }) {
                                 <Link to="/dashboard" className="text-slate-600 dark:text-slate-300 hover:text-blue-600 font-medium transition-colors">Dashboard</Link>
                                 {user.role === 'admin' && (
                                     <>
+                                        <button 
+                                            onClick={() => {
+                                                const msg = new SpeechSynthesisUtterance("Welcome to the Edu Verify AI Demo. Upload a genuine certificate to see instant verification. Upload a tampered certificate to see the A.I. detect anomalies. View the admin dashboard for real-time fraud alerts and geographic analytics.");
+                                                window.speechSynthesis.speak(msg);
+                                            }}
+                                            className="flex items-center gap-1 text-purple-600 dark:text-purple-400 font-bold hover:text-purple-800 transition-colors bg-purple-50 dark:bg-purple-900/20 px-3 py-1.5 rounded-lg border border-purple-200 dark:border-purple-800"
+                                        >
+                                            🎤 Voice Demo
+                                        </button>
                                         <Link to="/admin" className="text-slate-600 dark:text-slate-300 hover:text-blue-600 font-medium transition-colors">Admin Panel</Link>
                                         <NotificationBell />
                                     </>

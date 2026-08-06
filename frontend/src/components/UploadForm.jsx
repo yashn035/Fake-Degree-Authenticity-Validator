@@ -32,17 +32,7 @@ export default function UploadForm({ onResult }) {
     }, 200);
 
     try {
-      // Import the api client methods
-      const formData = new FormData();
-      formData.append('file', file);
-      
-      const response = await fetch(`/api/upload${useMock ? '?mock=true' : ''}`, {
-          method: 'POST',
-          body: formData
-      });
-      const result = await response.json();
-      
-      if (!response.ok) throw new Error(result.error || 'Failed to process document');
+      const result = await uploadCertificate(file, useMock);
       
       clearInterval(interval);
       const bar = document.getElementById('fake-progress-bar');

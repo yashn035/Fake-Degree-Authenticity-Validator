@@ -10,7 +10,7 @@ const db = new sqlite3.Database(dbPath);
 
 export const getCertificateById = (certId) => {
     return new Promise((resolve, reject) => {
-        db.get('SELECT * FROM certificates WHERE cert_id = ?', [certId], (err, row) => {
+        db.get('SELECT * FROM certificates WHERE UPPER(cert_id) = UPPER(?)', [certId], (err, row) => {
             if (err) reject(err);
             else resolve(row);
         });

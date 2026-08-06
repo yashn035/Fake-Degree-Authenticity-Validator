@@ -11,7 +11,10 @@ export async function extractText(imagePath) {
     
     // Simple regex extraction (adjust based on your cert format)
     const name = lines.find(l => /name/i.test(l))?.replace(/name:?\s*/i, '').trim() || '';
-    const certId = lines.find(l => /cert|id|number|c0/i.test(l))?.match(/C\d{3}/i)?.[0] || lines.find(l => /cert|id|number/i.test(l))?.replace(/cert(ificate)?\s*(id|no|number)?:?\s*/i, '').trim() || '';
+    let certId = lines.find(l => /cert|id|number|c0/i.test(l))?.match(/C[0-9O]{3}/i)?.[0] || lines.find(l => /cert|id|number/i.test(l))?.replace(/cert(ificate)?\s*(id|no|number)?:?\s*/i, '').trim() || '';
+    if (certId) {
+        certId = certId.toUpperCase().replace(/O/g, '0').trim();
+    }
     const institution = lines.find(l => /institution|college|university/i.test(l))?.replace(/institution|college|university:?\s*/i, '').trim() || '';
     const course = lines.find(l => /course|degree|program/i.test(l))?.replace(/course|degree|program:?\s*/i, '').trim() || '';
     const marks = lines.find(l => /marks|percentage|grade|%/.test(l))?.replace(/marks|percentage|grade:?\s*/i, '').trim() || lines.find(l => /%/.test(l))?.match(/\d{1,3}%/)?.[0] || '';

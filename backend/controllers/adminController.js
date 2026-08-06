@@ -146,6 +146,27 @@ export const getAnalytics = (req, res) => {
         .slice(0, 5)
         .map(([name, count]) => ({ name, count }));
 
+    // Leaderboard logic
+    const authenticHeatmap = {};
+    verificationLogs.forEach(log => {
+        if (log.verdict === 'VERIFIED' && log.extractedData?.institution) {
+            const inst = log.extractedData.institution;
+            authenticHeatmap[inst] = (authenticHeatmap[inst] || 0) + 1;
+        }
+    });
+
+    const topAuthentic = Object.entries(authenticHeatmap)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 10)
+        .map(([name, count]) => ({ name, count }));
+
+    const topOffenders = Object.entries(instHeatmap)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 10)
+        .map(([name, count]) => ({ name, count }));
+    
+    const leaderboard = { verified: topAuthentic, offenders: topOffenders };
+
     // Generate daily trends
     const last30Days = Array.from({length: 30}, (_, i) => {
         const d = new Date();
@@ -193,6 +214,7 @@ export const getAnalytics = (req, res) => {
         topInstitutions,
         dailyTrends,
         recentVerifications: recentSuspicious,
-        institutionHeatmap: instHeatmap
+        institutionHeatmap: instHeatmap,
+        leaderboard
     });
 };

@@ -1,6 +1,48 @@
 import { getCertificateById, getCertificatesByHash } from '../models/Certificate.js';
 import { isBlacklisted } from '../models/Blacklist.js';
 
+export function calculateFraudProbability(certData, dbMatch = true) {
+  let score = 0;
+  let factors = [];
+  
+  if (certData.marks && certData.marks.includes('%')) {
+    const marks = parseInt(certData.marks);
+    if (marks > 90) {
+      score += 30;
+      factors.push('Unusually high marks');
+    }
+  }
+  
+  const year = parseInt(certData.year);
+  if (year > 2024) {
+    score += 20;
+    factors.push('Future date detected');
+  }
+  
+  const fakeInstitutions = ['Unknown University', 'Online Degree', 'Distance Learning'];
+  if (fakeInstitutions.includes(certData.institution)) {
+    score += 20;
+    factors.push('Unrecognized institution');
+  }
+  
+  if (certData.student_name && certData.student_name.length < 3) {
+    score += 15;
+    factors.push('Suspicious name format');
+  }
+  
+  if (!dbMatch) {
+    score += 15;
+    factors.push('Not found in database');
+  }
+  
+  return {
+    probability: Math.min(score, 100),
+    riskLevel: score > 70 ? 'HIGH' : score > 40 ? 'MEDIUM' : 'LOW',
+    factors: factors.slice(0, 3),
+    timestamp: new Date().toISOString()
+  };
+}
+
 export const validateCertificate = async (extracted, imgHash) => {
     const { certId } = extracted;
     
@@ -16,7 +58,7 @@ export const validateCertificate = async (extracted, imgHash) => {
     const dbRecord = await getCertificateById(certId);
     
     if (!dbRecord) {
-        return { verdict: 'NOT_FOUND', message: 'Certificate ID not found in database', dbRecord: null };
+        return { verdict: 'NOT_FOUND', message: 'Certificate ID not found in database', dbRecord: null, fraudPrediction: calculateFraudProbability(extracted, false) };
     }
 
     // Check for duplicate uploads (Flagged)
@@ -52,7 +94,8 @@ export const validateCertificate = async (extracted, imgHash) => {
             matchedFields: matches,
             mismatchedFields: mismatches,
             hashMatch: true,
-            dbRecord
+            dbRecord,
+            fraudPrediction: calculateFraudProbability(extracted, true)
         };
     }
 
@@ -62,7 +105,8 @@ export const validateCertificate = async (extracted, imgHash) => {
             matchedFields: matches, 
             mismatchedFields: [], 
             hashMatch: false,
-            dbRecord 
+            dbRecord,
+            fraudPrediction: calculateFraudProbability(extracted, true)
         };
     } else {
         return { 
@@ -70,7 +114,8 @@ export const validateCertificate = async (extracted, imgHash) => {
             matchedFields: matches, 
             mismatchedFields: mismatches, 
             hashMatch: false,
-            dbRecord 
+            dbRecord,
+            fraudPrediction: calculateFraudProbability(extracted, true)
         };
     }
 };

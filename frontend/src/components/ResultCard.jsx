@@ -140,6 +140,36 @@ export default function ResultCard({ result, originalFile }) {
           </div>
         )}
 
+        {result.fraudPrediction && result.verdict !== 'VERIFIED' && (
+          <div className="mb-8 p-6 bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
+            <h3 className="font-semibold text-slate-800 dark:text-white text-lg mb-4">AI Fraud Prediction</h3>
+            <div className="mb-2 flex justify-between text-sm font-medium">
+                <span className="text-slate-600 dark:text-slate-400">Probability of Fraud</span>
+                <span className={`${result.fraudPrediction.probability > 70 ? 'text-red-600' : result.fraudPrediction.probability > 40 ? 'text-amber-600' : 'text-emerald-600'}`}>
+                    {result.fraudPrediction.probability}%
+                </span>
+            </div>
+            <div className="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-3 mb-4 overflow-hidden">
+                <div 
+                    className={`h-3 rounded-full transition-all duration-1000 ${result.fraudPrediction.probability > 70 ? 'bg-red-500' : result.fraudPrediction.probability > 40 ? 'bg-amber-500' : 'bg-emerald-500'}`}
+                    style={{ width: `${result.fraudPrediction.probability}%` }}
+                ></div>
+            </div>
+            <p className="text-sm font-medium mb-2 text-slate-700 dark:text-slate-300">
+                Risk Level: <strong className={`${result.fraudPrediction.riskLevel === 'HIGH' ? 'text-red-600' : result.fraudPrediction.riskLevel === 'MEDIUM' ? 'text-amber-600' : 'text-emerald-600'}`}>{result.fraudPrediction.riskLevel}</strong>
+            </p>
+            {result.fraudPrediction.factors.length > 0 && (
+                <ul className="text-sm space-y-1 mt-3">
+                    {result.fraudPrediction.factors.map((factor, i) => (
+                        <li key={i} className="flex items-center gap-2 text-slate-600 dark:text-slate-400">
+                            <AlertTriangle className="w-3 h-3 text-amber-500" /> {factor}
+                        </li>
+                    ))}
+                </ul>
+            )}
+          </div>
+        )}
+
         {result.dbRecord && result.verdict !== 'NOT_FOUND' && (
           <div>
             <h3 className="font-semibold text-slate-800 text-lg border-b border-slate-100 pb-2 mb-4">Official Record Details</h3>

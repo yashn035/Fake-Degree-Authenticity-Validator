@@ -28,11 +28,12 @@ api.interceptors.response.use(
     }
 );
 
-export const uploadCertificate = async (file) => {
+export const uploadCertificate = async (file, useMock = false) => {
     const formData = new FormData();
     formData.append('file', file);
     
-    const response = await api.post('/upload', formData);
+    const url = useMock ? '/upload?mock=true' : '/upload';
+    const response = await api.post(url, formData);
     return response.data;
 };
 
@@ -115,5 +116,10 @@ export const resolveAlert = async (id) => {
 // Analytics
 export const getAnalytics = async () => {
     const response = await api.get('/analytics');
+    return response.data;
+};
+
+export const exportData = async () => {
+    const response = await api.get('/export');
     return response.data;
 };
