@@ -24,7 +24,7 @@ function App() {
           <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<RegisterPage />} />
-          <Route path="/dashboard" element={<ProtectedRoute><div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8"><UploadPage /></div></ProtectedRoute>} />
+          <Route path="/dashboard" element={<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8"><UploadPage /></div>} />
           <Route path="/admin" element={<ProtectedRoute requiredRole="admin"><div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8"><AdminPage /></div></ProtectedRoute>} />
         </Routes>
       </main>

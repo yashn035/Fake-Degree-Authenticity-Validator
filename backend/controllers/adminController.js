@@ -218,3 +218,50 @@ export const getAnalytics = (req, res) => {
         leaderboard
     });
 };
+
+export const bulkUpload = async (req, res) => {
+    try {
+        if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
+        
+        const csvText = req.file.buffer.toString('utf-8');
+        const lines = csvText.split('\n').map(l => l.trim()).filter(l => l);
+        if (lines.length < 2) return res.status(400).json({ error: 'CSV must contain headers and at least one row' });
+        
+        const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
+        
+        // Expected headers: cert_id, student_name, institution, course, year, marks, issue_date
+        const { default: db } = await import('../models/Certificate.js');
+        
+        let insertedCount = 0;
+        let errorCount = 0;
+        
+        for (let i = 1; i < lines.length; i++) {
+            const values = lines[i].split(',').map(v => v.trim());
+            const row = {};
+            headers.forEach((h, idx) => row[h] = values[idx]);
+            
+            if (row.cert_id && row.student_name) {
+                try {
+                    await new Promise((resolve, reject) => {
+                        db.run(
+                            `INSERT INTO certificates (cert_id, student_name, institution, course, year, marks, issue_date) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+                            [row.cert_id, row.student_name, row.institution, row.course, row.year, row.marks, row.issue_date],
+                            (err) => {
+                                if (err) reject(err);
+                                else resolve();
+                            }
+                        );
+                    });
+                    insertedCount++;
+                } catch (e) {
+                    errorCount++; // Ignore duplicates or constraint failures silently
+                }
+            }
+        }
+        
+        res.json({ message: `Bulk upload complete. Inserted: ${insertedCount}, Failed: ${errorCount}` });
+    } catch (error) {
+        console.error('Bulk upload error:', error);
+        res.status(500).json({ error: 'Failed to process bulk upload' });
+    }
+};

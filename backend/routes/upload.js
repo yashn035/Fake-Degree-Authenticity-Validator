@@ -1,7 +1,7 @@
 import express from 'express';
 import multer from 'multer';
 import { handleUpload } from '../controllers/uploadController.js';
-import { authenticate } from '../middleware/auth.js';
+// Removed authenticate middleware for public verification
 
 const router = express.Router();
 
@@ -33,6 +33,7 @@ const uploadMiddleware = (req, res, next) => {
     });
 };
 
-router.post('/', authenticate, uploadMiddleware, handleUpload);
+// Publicly accessible route
+router.post('/', uploadMiddleware, handleUpload);
 
 export default router;

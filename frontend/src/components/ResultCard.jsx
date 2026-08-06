@@ -9,7 +9,8 @@ const verdictConfig = {
   TAMPERED: { color: 'text-red-600', bg: 'bg-red-50', border: 'border-red-200', icon: XCircle, label: 'Tampering Detected' },
   FLAGGED: { color: 'text-amber-600', bg: 'bg-amber-50', border: 'border-amber-200', icon: AlertTriangle, label: 'Duplicate/Flagged' },
   BLACKLISTED: { color: 'text-purple-600', bg: 'bg-purple-50', border: 'border-purple-200', icon: XCircle, label: 'Blacklisted Certificate' },
-  NOT_FOUND: { color: 'text-slate-600', bg: 'bg-slate-50', border: 'border-slate-200', icon: HelpCircle, label: 'Record Not Found' }
+  NOT_FOUND: { color: 'text-slate-600', bg: 'bg-slate-50', border: 'border-slate-200', icon: HelpCircle, label: 'Record Not Found' },
+  LEGACY_UNVERIFIED: { color: 'text-indigo-600', bg: 'bg-indigo-50', border: 'border-indigo-200', icon: HelpCircle, label: 'Legacy Document' }
 };
 
 export default function ResultCard({ result, originalFile }) {
@@ -84,7 +85,7 @@ export default function ResultCard({ result, originalFile }) {
           <div>
             <h2 className={`text-2xl font-bold ${config.color}`}>{config.label}</h2>
             <p className="text-slate-600 dark:text-slate-400 mt-1">
-              {result.verdict === 'NOT_FOUND' || result.verdict === 'BLACKLISTED'
+              {['NOT_FOUND', 'BLACKLISTED', 'LEGACY_UNVERIFIED'].includes(result.verdict)
                 ? result.message 
                 : `Database ID: ${certId || 'Unknown'}`}
             </p>

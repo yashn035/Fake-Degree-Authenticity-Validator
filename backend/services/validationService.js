@@ -58,6 +58,9 @@ export const validateCertificate = async (extracted, imgHash) => {
     const dbRecord = await getCertificateById(certId);
     
     if (!dbRecord) {
+        if (extracted.name || extracted.institution) {
+            return { verdict: 'LEGACY_UNVERIFIED', message: 'Record not found in digital database, but document structure appears valid. Manual university verification recommended.', dbRecord: null, fraudPrediction: calculateFraudProbability(extracted, false) };
+        }
         return { verdict: 'NOT_FOUND', message: 'Certificate ID not found in database', dbRecord: null, fraudPrediction: calculateFraudProbability(extracted, false) };
     }
 

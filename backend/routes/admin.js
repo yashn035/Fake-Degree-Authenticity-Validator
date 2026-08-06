@@ -1,9 +1,11 @@
 import express from 'express';
-import { getVerifications, getTrends, resetSystem, getVerificationById, getBlacklistEntries, addBlacklistEntry, removeBlacklistEntry, getAnalytics } from '../controllers/adminController.js';
+import multer from 'multer';
+import { getVerifications, getTrends, resetSystem, getVerificationById, getBlacklistEntries, addBlacklistEntry, removeBlacklistEntry, getAnalytics, bulkUpload } from '../controllers/adminController.js';
 import db from '../models/Certificate.js';
 import { authenticate, authorizeAdmin } from '../middleware/auth.js';
 
 const router = express.Router();
+const upload = multer({ storage: multer.memoryStorage() });
 
 router.use(authenticate);
 router.use(authorizeAdmin);
@@ -23,5 +25,7 @@ router.get('/export', (req, res) => {
 });
 router.post('/blacklist', addBlacklistEntry);
 router.delete('/blacklist/:certId', removeBlacklistEntry);
+
+router.post('/bulk-upload', upload.single('file'), bulkUpload);
 
 export default router;

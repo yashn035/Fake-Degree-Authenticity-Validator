@@ -70,6 +70,7 @@ export default function Navbar({ darkMode, setDarkMode }) {
                         
                         {!user ? (
                             <>
+                                <Link to="/dashboard" className="text-slate-600 dark:text-slate-300 hover:text-blue-600 font-medium transition-colors">Verify Certificate</Link>
                                 <Link to="/login" className="text-slate-600 dark:text-slate-300 hover:text-blue-600 font-medium transition-colors">Login</Link>
                                 <Link to="/signup" className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">Sign Up</Link>
                             </>

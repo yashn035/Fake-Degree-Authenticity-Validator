@@ -111,7 +111,8 @@ export default function AdminPage() {
         { id: 'logs', label: '📋 Verification Logs' },
         { id: 'blockchain', label: '⛓️ Blockchain' },
         { id: 'live', label: '📡 Live Feed' },
-        { id: 'alerts', label: '🔔 Alerts' }
+        { id: 'alerts', label: '🔔 Alerts' },
+        { id: 'import', label: '📁 Bulk Import' }
     ];
 
     return (
@@ -298,6 +299,34 @@ export default function AdminPage() {
                                 )}
                             </div>
                         ))}
+                    </div>
+                </div>
+            )}
+            {activeTab === 'import' && (
+                <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-100 dark:border-slate-700">
+                    <h2 className="text-lg font-bold mb-4">Bulk Import Certificates (CSV)</h2>
+                    <p className="text-sm text-slate-500 mb-6">Upload a CSV file with headers: <code>cert_id, student_name, institution, course, year, marks, issue_date</code>.</p>
+                    <div className="border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-xl p-8 text-center hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
+                        <input type="file" accept=".csv" onChange={async (e) => {
+                            const file = e.target.files[0];
+                            if (!file) return;
+                            const formData = new FormData();
+                            formData.append('file', file);
+                            try {
+                                const token = localStorage.getItem('token');
+                                const url = import.meta.env.VITE_API_URL ? `${import.meta.env.VITE_API_URL}/admin/bulk-upload` : 'http://localhost:5000/api/admin/bulk-upload';
+                                const res = await fetch(url, {
+                                    method: 'POST',
+                                    headers: { Authorization: `Bearer ${token}` },
+                                    body: formData
+                                });
+                                const data = await res.json();
+                                alert(data.message || 'Upload complete');
+                                e.target.value = null;
+                            } catch (err) {
+                                alert('Upload failed');
+                            }
+                        }} className="block w-full mx-auto text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" />
                     </div>
                 </div>
             )}
