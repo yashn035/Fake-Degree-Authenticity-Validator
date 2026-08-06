@@ -88,34 +88,34 @@ export const validateCertificate = async (extracted, imgHash) => {
         }
     });
 
+    if (mismatches.length > 0) {
+        return { 
+            verdict: 'TAMPERED', 
+            matchedFields: matches, 
+            mismatchedFields: mismatches, 
+            hashMatch: hashMatch,
+            dbRecord,
+            fraudPrediction: calculateFraudProbability(extracted, true)
+        };
+    }
+
     if (hashMatch) {
         return {
             verdict: 'FLAGGED',
             matchedFields: matches,
-            mismatchedFields: mismatches,
+            mismatchedFields: [],
             hashMatch: true,
             dbRecord,
             fraudPrediction: calculateFraudProbability(extracted, true)
         };
     }
 
-    if (mismatches.length === 0) {
-        return { 
-            verdict: 'VERIFIED', 
-            matchedFields: matches, 
-            mismatchedFields: [], 
-            hashMatch: false,
-            dbRecord,
-            fraudPrediction: calculateFraudProbability(extracted, true)
-        };
-    } else {
-        return { 
-            verdict: 'TAMPERED', 
-            matchedFields: matches, 
-            mismatchedFields: mismatches, 
-            hashMatch: false,
-            dbRecord,
-            fraudPrediction: calculateFraudProbability(extracted, true)
-        };
-    }
+    return { 
+        verdict: 'VERIFIED', 
+        matchedFields: matches, 
+        mismatchedFields: [], 
+        hashMatch: false,
+        dbRecord,
+        fraudPrediction: calculateFraudProbability(extracted, true)
+    };
 };

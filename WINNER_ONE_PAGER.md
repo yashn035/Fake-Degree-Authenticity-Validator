@@ -20,10 +20,10 @@ EduVerify AI is a hackathon-ready prototype that demonstrates a production-grade
 ## Impact
 > **"EduVerify AI reduces the background verification timeline from 14 days to under 3 seconds."**
 
-## Known Limitations / Roadmap
-- **Database Scalability**: Currently uses SQLite for demonstration; roadmap includes migration to Postgres.
-- **Blockchain**: PoW is simulated in this prototype; production will integrate with Hyperledger or Ethereum.
-- **AI/ML**: Fraud prediction is currently driven by a rule-based weighted scoring engine; Phase 2 will implement true ML models.
+## Strategic Roadmap (Phase 2)
+- **Enterprise Data Scaling**: Swap local SQLite for Postgres/RDS to support concurrent multi-institution writes and global availability.
+- **Mainnet Blockchain Deployment**: Upgrade from our simulated PoW ledger to a live Hyperledger Fabric or Ethereum smart contract integration.
+- **Machine Learning Integration**: Replace the current rule-based fraud scoring engine with a true supervised ML model trained on historical forgery patterns.
 
 ## Architecture
 `[ React PWA ] ⇄ [ Node.js Microservices (Tesseract.js) ] ⇄ [ SQLite / Blockchain Ledger ]`

@@ -118,7 +118,13 @@ export default function AdminPage() {
         <div className="space-y-8 animate-in fade-in duration-500 pb-20">
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                    <div className="p-2 bg-blue-100 dark:bg-blue-900 rounded-lg cursor-pointer" onClick={(e) => { if (e.detail === 3) handleReset(); }} title="Triple-click to reset system">
+                    <div className="p-2 bg-blue-100 dark:bg-blue-900 rounded-lg cursor-pointer" onClick={(e) => { 
+                        if (e.detail === 3) {
+                            if (window.confirm("⚠️ EMERGENCY KILLSWITCH TRIGGERED ⚠️\n\nThis will completely wipe and reseed the database. Are you absolutely sure you want to proceed?")) {
+                                handleReset();
+                            }
+                        } 
+                    }} title="Triple-click to reset system">
                         <Activity className="w-6 h-6 text-blue-600 dark:text-blue-400" />
                     </div>
                     <h1 className="text-3xl font-bold text-slate-900 dark:text-white">Admin Dashboard</h1>
