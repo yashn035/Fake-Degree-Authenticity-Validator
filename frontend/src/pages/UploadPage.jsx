@@ -5,8 +5,11 @@ import { CloudDownload } from 'lucide-react';
 
 export default function UploadPage() {
   const [result, setResult] = useState(null);
+  const [pendingResult, setPendingResult] = useState(null);
   const [originalFile, setOriginalFile] = useState(null);
   const [fetchingDL, setFetchingDL] = useState(false);
+  const [otp, setOtp] = useState('');
+  const [otpError, setOtpError] = useState(false);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -54,9 +57,9 @@ export default function UploadPage() {
         </p>
       </div>
 
-      {!result ? (
+      {!result && !pendingResult ? (
         <div className="space-y-6">
-            <UploadForm onResult={(res, file) => { setResult(res); setOriginalFile(file); }} />
+            <UploadForm onResult={(res, file) => { setPendingResult(res); setOriginalFile(file); }} />
             <div className="flex items-center justify-center space-x-4 py-4">
                 <div className="h-px bg-slate-200 dark:bg-slate-700 flex-1"></div>
                 <span className="text-slate-400 text-sm font-medium">OR</span>
@@ -70,10 +73,45 @@ export default function UploadPage() {
                 {fetchingDL ? 'Authenticating with National e-Governance Division...' : 'Fetch Verified Document from DigiLocker'}
             </button>
         </div>
+      ) : pendingResult && !result ? (
+        <div className="max-w-md mx-auto bg-white dark:bg-slate-800 p-8 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 text-center space-y-6 animate-in zoom-in-95">
+            <h2 className="text-xl font-bold text-slate-800 dark:text-white">Student Consent Required</h2>
+            <p className="text-slate-500 text-sm">
+                To comply with the Data Privacy Act, an OTP has been sent to the student's registered mobile number ending in ****1234.
+            </p>
+            <p className="text-xs text-blue-500 font-mono bg-blue-50 dark:bg-blue-900/20 p-2 rounded">(Demo Mode: Enter 1234 to proceed)</p>
+            <div>
+                <input 
+                    type="text" 
+                    maxLength="4"
+                    value={otp}
+                    onChange={e => setOtp(e.target.value)}
+                    placeholder="Enter 4-digit OTP" 
+                    className={`w-full text-center tracking-[1em] font-mono text-2xl p-4 border rounded-xl dark:bg-slate-900 focus:outline-none focus:ring-2 ${otpError ? 'border-red-500 focus:ring-red-500' : 'border-slate-300 dark:border-slate-600 focus:ring-blue-500'}`}
+                />
+                {otpError && <p className="text-red-500 text-xs mt-2">Invalid OTP. Please try again.</p>}
+            </div>
+            <div className="flex gap-4">
+                <button 
+                    onClick={() => { setPendingResult(null); setOriginalFile(null); setOtp(''); setOtpError(false); }}
+                    className="flex-1 px-4 py-3 bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-300 rounded-xl font-medium hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"
+                >Cancel</button>
+                <button 
+                    onClick={() => {
+                        if (otp === '1234') {
+                            setResult(pendingResult);
+                        } else {
+                            setOtpError(true);
+                        }
+                    }}
+                    className="flex-1 px-4 py-3 bg-blue-600 text-white rounded-xl font-medium hover:bg-blue-700 transition-colors"
+                >Verify OTP</button>
+            </div>
+        </div>
       ) : (
         <div className="space-y-6">
           <button 
-            onClick={() => { setResult(null); setOriginalFile(null); }}
+            onClick={() => { setResult(null); setPendingResult(null); setOriginalFile(null); setOtp(''); setOtpError(false); }}
             className="text-sm font-medium text-blue-600 hover:text-blue-700 flex items-center transition-colors"
           >
             ← Verify another document
