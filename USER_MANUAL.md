@@ -9,11 +9,11 @@ Welcome to EduVerify AI. This system is designed for institutions and employers 
 ## Verifying a Certificate
 1. From the dashboard, drag and drop the scanned certificate image or PDF.
 2. Click **Scan & Verify**. 
-3. The system will use AI to read the text and compare it against the immutable database.
+3. The system will extract the text and compare it against the immutable database.
 
 ## Understanding Results
 - **VERIFIED ✅**: The document is 100% authentic and unaltered.
-- **TAMPERED ❌**: The document is a forgery. The system will highlight exactly which field (e.g. Marks) was altered by the applicant.
+- **TAMPERED ❌**: The document exists in the database, but the user altered a specific field (e.g., Marks). The system will highlight exactly which field was altered.
 - **NOT_FOUND ⚠️**: The certificate ID does not exist in the official university records.
 - **FLAGGED ⚠️**: The data matches, but this exact image file has been uploaded before, indicating a potential duplicate submission.
 - **BLACKLISTED 🚫**: This certificate has been flagged by an Admin for confirmed fraud.
@@ -21,8 +21,12 @@ Welcome to EduVerify AI. This system is designed for institutions and employers 
 ## Admin Guide
 - **Analytics Dashboard**: View real-time fraud trends, geographic heatmaps, and institution leaderboards.
 - **Live Feed**: Watch a real-time stream of verifications happening globally.
-- **Blockchain**: Issue new certificates directly to the cryptographic ledger.
+- **Blockchain Simulation**: Issue new certificates directly to the simulated cryptographic ledger.
 - **Bulk Import**: Import CSVs of new student records into the database.
+
+### Power-User Features
+- **Global Blacklist**: Manually blacklist a certificate ID to instantly reject it in future scans.
+- **Emergency Killswitch**: Triple-click the Activity icon on the dashboard to safely truncate and reseed the demonstration database.
 
 ## FAQ
 **Q: What if the image is blurry?**

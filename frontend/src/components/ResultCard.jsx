@@ -142,7 +142,7 @@ export default function ResultCard({ result, originalFile }) {
 
         {result.fraudPrediction && result.verdict !== 'VERIFIED' && (
           <div className="mb-8 p-6 bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
-            <h3 className="font-semibold text-slate-800 dark:text-white text-lg mb-4">AI Fraud Prediction</h3>
+            <h3 className="font-semibold text-slate-800 dark:text-white text-lg mb-4">Rule-Based Fraud Scoring</h3>
             <div className="mb-2 flex justify-between text-sm font-medium">
                 <span className="text-slate-600 dark:text-slate-400">Probability of Fraud</span>
                 <span className={`${result.fraudPrediction.probability > 70 ? 'text-red-600' : result.fraudPrediction.probability > 40 ? 'text-amber-600' : 'text-emerald-600'}`}>
