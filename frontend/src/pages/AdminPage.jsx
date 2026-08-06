@@ -21,11 +21,12 @@ export default function AdminPage() {
     const [alerts, setAlerts] = useState([]);
     const [chain, setChain] = useState([]);
     const [liveEvents, setLiveEvents] = useState([]);
-    const [certData, setCertData] = useState({ certId: '', studentName: '', course: '', institution: '', year: '', marks: '' });
-    const [mining, setMining] = useState(false);
     const [analyticsData, setAnalyticsData] = useState(null);
     const [blacklist, setBlacklist] = useState([]);
     const [auditLogs, setAuditLogs] = useState([]);
+    const [legacyQueue, setLegacyQueue] = useState([]);
+    const [certData, setCertData] = useState({ certId: '', studentName: '', course: '', institution: '', year: '', marks: '' });
+    const [mining, setMining] = useState(false);
 
     useEffect(() => {
         const loadData = async () => {
@@ -56,6 +57,10 @@ export default function AdminPage() {
             import('../api/apiClient').then(({ fetchBlacklist, getAuditLogs }) => {
                 fetchBlacklist().then(setBlacklist).catch(console.error);
                 getAuditLogs().then(setAuditLogs).catch(console.error);
+            });
+        } else if (activeTab === 'legacy') {
+            import('../api/apiClient').then(({ fetchLegacyQueue }) => {
+                fetchLegacyQueue().then(setLegacyQueue).catch(console.error);
             });
         }
     };
@@ -114,6 +119,7 @@ export default function AdminPage() {
 
         { id: 'dashboard', label: '📊 Dashboard' },
         { id: 'analytics', label: '📈 Analytics' },
+        { id: 'legacy', label: '🕰️ Legacy Review' },
         { id: 'logs', label: '📋 Verification Logs' },
         { id: 'security', label: '🛡️ Security & Audit' },
         { id: 'blockchain', label: '⛓️ Blockchain' },
@@ -126,17 +132,21 @@ export default function AdminPage() {
         <div className="space-y-8 animate-in fade-in duration-500 pb-20">
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                    <div className="p-2 bg-blue-100 dark:bg-blue-900 rounded-lg cursor-pointer" onClick={(e) => { 
-                        if (e.detail === 3) {
-                            if (window.confirm("⚠️ EMERGENCY KILLSWITCH TRIGGERED ⚠️\n\nThis will completely wipe and reseed the database. Are you absolutely sure you want to proceed?")) {
-                                handleReset();
-                            }
-                        } 
-                    }} title="Triple-click to reset system">
+                    <div className="p-2 bg-blue-100 dark:bg-blue-900 rounded-lg">
                         <Activity className="w-6 h-6 text-blue-600 dark:text-blue-400" />
                     </div>
                     <h1 className="text-3xl font-bold text-slate-900 dark:text-white">Admin Dashboard</h1>
                 </div>
+                <button 
+                    onClick={() => {
+                        if (window.confirm("⚠️ EMERGENCY KILLSWITCH TRIGGERED ⚠️\n\nThis will completely wipe and reseed the database. Are you absolutely sure you want to proceed?")) {
+                            handleReset();
+                        }
+                    }}
+                    className="px-4 py-2 bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 border border-red-200 dark:border-red-800 rounded-lg font-bold shadow-sm hover:bg-red-200 dark:hover:bg-red-900/50 transition-colors flex items-center gap-2"
+                >
+                    ⚠️ Emergency Reset
+                </button>
             </div>
 
             <div role="tablist" aria-label="Admin Dashboard Tabs" className="flex space-x-2 overflow-x-auto pb-2 border-b border-slate-200 dark:border-slate-700">
@@ -244,6 +254,42 @@ export default function AdminPage() {
                 <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">
                     <h2 className="text-lg font-semibold text-slate-800 dark:text-white mb-6">Verification Logs</h2>
                     <VerificationTable logs={logs} />
+                </div>
+            )}
+
+            {activeTab === 'legacy' && (
+                <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">
+                    <h2 className="text-xl font-bold text-amber-600 dark:text-amber-500 mb-2">Legacy Certificate Review Queue</h2>
+                    <p className="text-sm text-slate-500 mb-6">These certificates appeared valid structurally but were missing from the database. Manual verification required.</p>
+                    <div className="space-y-4">
+                        {legacyQueue.length === 0 && <p className="text-slate-500 italic">No pending legacy certificates in the queue.</p>}
+                        {legacyQueue.map(item => (
+                            <div key={item.certId} className="border border-amber-200 dark:border-amber-900/30 bg-amber-50 dark:bg-amber-900/10 p-4 rounded-xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                                <div>
+                                    <h3 className="font-bold text-slate-800 dark:text-white">{item.certId} - {item.extractedData?.name}</h3>
+                                    <p className="text-sm text-slate-600 dark:text-slate-400">{item.extractedData?.institution} | {item.extractedData?.year} | {item.extractedData?.marks}</p>
+                                    <p className="text-xs text-slate-400 mt-1">Uploaded: {new Date(item.timestamp).toLocaleString()}</p>
+                                </div>
+                                <div className="flex gap-2">
+                                    <button onClick={async () => {
+                                        const { resolveLegacyCertificate } = await import('../api/apiClient');
+                                        await resolveLegacyCertificate(item.certId, 'VERIFY');
+                                        fetchExtraData(); // refresh queue
+                                    }} className="px-4 py-2 bg-emerald-600 text-white text-sm font-medium rounded hover:bg-emerald-700 shadow-sm transition-colors">
+                                        Verify & Mint
+                                    </button>
+                                    <button onClick={async () => {
+                                        if(!window.confirm('Are you sure you want to reject this certificate? It will be permanently blacklisted.')) return;
+                                        const { resolveLegacyCertificate } = await import('../api/apiClient');
+                                        await resolveLegacyCertificate(item.certId, 'REJECT');
+                                        fetchExtraData();
+                                    }} className="px-4 py-2 bg-white dark:bg-slate-800 text-red-600 border border-red-200 dark:border-red-900/50 text-sm font-medium rounded hover:bg-red-50 dark:hover:bg-red-900/20 shadow-sm transition-colors">
+                                        Reject as Forged
+                                    </button>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
                 </div>
             )}
 

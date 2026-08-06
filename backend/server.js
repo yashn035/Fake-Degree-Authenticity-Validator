@@ -14,6 +14,7 @@ import authRoutes from './routes/auth.js';
 import blockchainRoutes from './routes/blockchain.js';
 import eventRoutes from './routes/events.js';
 import alertRoutes from './routes/alerts.js';
+import institutionRoutes from './routes/institution.js';
 
 dotenv.config();
 
@@ -41,6 +42,7 @@ app.use('/api/blockchain', blockchainRoutes);
 app.use('/api/events', eventRoutes);
 app.use('/api/alerts', alertRoutes);
 app.use('/api', adminRoutes);
+app.use('/api/v1/institution', institutionRoutes);
 
 // Initialize DB and start server
 const startServer = async () => {

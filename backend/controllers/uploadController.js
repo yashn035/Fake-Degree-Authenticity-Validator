@@ -93,7 +93,23 @@ export const handleUpload = async (req, res) => {
 
         logAudit(extractedData.certId || 'UNKNOWN', verifierIp, 'VERIFICATION_ATTEMPT', validationResult.verdict);
 
-        res.json(validationResult);
+        // Data Minimization (RBAC)
+        // Strip sensitive data for public viewing
+        const publicResult = { ...validationResult };
+        if (publicResult.dbRecord) {
+            publicResult.dbRecord = {
+                institution: publicResult.dbRecord.institution
+                // Name, marks, year, course are hidden
+            };
+        }
+        if (publicResult.extractedData) {
+            publicResult.extractedData = {
+                institution: publicResult.extractedData.institution,
+                name: publicResult.extractedData.name // Only show name and institution
+            };
+        }
+
+        res.json(publicResult);
     } catch (error) {
         console.error('Upload Error:', error);
         res.status(500).json({ error: 'Internal server error during verification' });

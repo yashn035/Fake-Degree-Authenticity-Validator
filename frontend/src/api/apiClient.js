@@ -128,3 +128,13 @@ export const getAuditLogs = async () => {
     const response = await api.get('/audit');
     return response.data;
 };
+
+export const fetchLegacyQueue = async () => {
+    const response = await api.get('/legacy-queue');
+    return response.data;
+};
+
+export const resolveLegacyCertificate = async (certId, action) => {
+    const response = await api.post(`/legacy/${certId}/resolve`, { action });
+    return response.data;
+};

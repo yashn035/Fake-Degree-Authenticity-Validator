@@ -275,3 +275,44 @@ export const getAuditLogsController = async (req, res) => {
         res.status(500).json({ error: 'Failed to fetch audit logs' });
     }
 };
+
+export const getLegacyQueue = (req, res) => {
+    const legacyItems = verificationLogs.filter(l => l.verdict === 'LEGACY_UNVERIFIED');
+    res.json(legacyItems);
+};
+
+export const resolveLegacyCertificate = async (req, res) => {
+    const { id } = req.params; // this is certId
+    const { action } = req.body; // 'VERIFY' or 'REJECT'
+    
+    const logIndex = verificationLogs.findIndex(l => l.certId === id && l.verdict === 'LEGACY_UNVERIFIED');
+    if (logIndex === -1) return res.status(404).json({ error: 'Legacy record not found in queue' });
+    
+    const logItem = verificationLogs[logIndex];
+    
+    if (action === 'VERIFY') {
+        const { default: db } = await import('../models/Certificate.js');
+        const { certId, name, institution, course, year, marks } = logItem.extractedData;
+        
+        db.run(
+            `INSERT INTO certificates (cert_id, student_name, institution, course, year, marks) VALUES (?, ?, ?, ?, ?, ?)`,
+            [certId, name, institution, course || '', year || '', marks || ''],
+            async (err) => {
+                if (err && !err.message.includes('UNIQUE constraint failed')) {
+                    return res.status(500).json({ error: 'Failed to insert legacy certificate' });
+                }
+                verificationLogs[logIndex].verdict = 'VERIFIED';
+                const { logAudit } = await import('../models/AuditLog.js');
+                logAudit(certId, req.ip || 'Admin', 'LEGACY_APPROVAL', 'Manually verified by Admin');
+                res.json({ message: 'Legacy certificate officially verified and minted' });
+            }
+        );
+    } else if (action === 'REJECT') {
+        verificationLogs[logIndex].verdict = 'TAMPERED'; // Or some other rejected state
+        const { addToBlacklist } = await import('../models/Blacklist.js');
+        await addToBlacklist(id, 'Legacy manual verification failed');
+        res.json({ message: 'Legacy certificate rejected and blacklisted' });
+    } else {
+        res.status(400).json({ error: 'Invalid action' });
+    }
+};
