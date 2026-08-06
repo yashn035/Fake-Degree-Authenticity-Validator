@@ -6,7 +6,9 @@
   "type": "module",
   "scripts": {
     "start": "node server.js",
-    "dev": "node --watch server.js"
+    "dev": "node --watch server.js",
+    "test": "node tests/final.test.js",
+    "ci": "npm run test"
   },
   "dependencies": {
     "@pdf-lib/fontkit": "^1.1.1",
@@ -23,5 +25,8 @@
     "sharp": "^0.35.3",
     "sqlite3": "^5.1.7",
     "tesseract.js": "^5.0.5"
+  },
+  "devDependencies": {
+    "supertest": "^7.2.2"
   }
 }
