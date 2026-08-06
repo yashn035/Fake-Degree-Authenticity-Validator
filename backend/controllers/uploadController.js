@@ -2,6 +2,7 @@ import { extractText } from '../services/ocrService.js';
 import { validateCertificate } from '../services/validationService.js';
 import { generateImageHash } from '../services/hashService.js';
 import { addVerificationLog } from './adminController.js';
+import { logAudit } from '../models/AuditLog.js';
 import fs from 'fs';
 
 export const handleUpload = async (req, res) => {
@@ -11,6 +12,7 @@ export const handleUpload = async (req, res) => {
         }
 
         const filePath = req.file.path;
+        const verifierIp = req.ip || req.headers['x-forwarded-for'] || 'Unknown';
         
         // Deepfake Metadata Forensics (Simulated)
         if (req.file.originalname.toLowerCase().includes('deepfake') || req.file.originalname.toLowerCase().includes('photoshop')) {
@@ -34,6 +36,7 @@ export const handleUpload = async (req, res) => {
                 alertService.sendAlert(validationResult.verdict, logData);
             });
             fs.unlinkSync(filePath);
+            logAudit('UNKNOWN_FORGED', verifierIp, 'VERIFICATION_ATTEMPT', 'Deepfake Forensic Failure');
             return res.json(validationResult);
         }
         
@@ -87,6 +90,8 @@ export const handleUpload = async (req, res) => {
 
         // 5. Cleanup
         fs.unlinkSync(filePath);
+
+        logAudit(extractedData.certId || 'UNKNOWN', verifierIp, 'VERIFICATION_ATTEMPT', validationResult.verdict);
 
         res.json(validationResult);
     } catch (error) {

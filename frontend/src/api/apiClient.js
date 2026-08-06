@@ -123,3 +123,8 @@ export const exportData = async () => {
     const response = await api.get('/export');
     return response.data;
 };
+
+export const getAuditLogs = async () => {
+    const response = await api.get('/audit');
+    return response.data;
+};

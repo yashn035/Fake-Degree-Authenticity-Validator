@@ -24,6 +24,8 @@ export default function AdminPage() {
     const [certData, setCertData] = useState({ certId: '', studentName: '', course: '', institution: '', year: '', marks: '' });
     const [mining, setMining] = useState(false);
     const [analyticsData, setAnalyticsData] = useState(null);
+    const [blacklist, setBlacklist] = useState([]);
+    const [auditLogs, setAuditLogs] = useState([]);
 
     useEffect(() => {
         const loadData = async () => {
@@ -50,6 +52,11 @@ export default function AdminPage() {
             import('../api/apiClient').then(({ getBlockchain }) => getBlockchain().then(setChain).catch(console.error));
         } else if (activeTab === 'analytics') {
             import('../api/apiClient').then(({ getAnalytics }) => getAnalytics().then(setAnalyticsData).catch(console.error));
+        } else if (activeTab === 'security') {
+            import('../api/apiClient').then(({ fetchBlacklist, getAuditLogs }) => {
+                fetchBlacklist().then(setBlacklist).catch(console.error);
+                getAuditLogs().then(setAuditLogs).catch(console.error);
+            });
         }
     };
 
@@ -105,10 +112,10 @@ export default function AdminPage() {
         );
     }
 
-    const tabs = [
         { id: 'dashboard', label: '📊 Dashboard' },
         { id: 'analytics', label: '📈 Analytics' },
         { id: 'logs', label: '📋 Verification Logs' },
+        { id: 'security', label: '🛡️ Security & Audit' },
         { id: 'blockchain', label: '⛓️ Blockchain' },
         { id: 'live', label: '📡 Live Feed' },
         { id: 'alerts', label: '🔔 Alerts' },
@@ -237,6 +244,75 @@ export default function AdminPage() {
                 <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">
                     <h2 className="text-lg font-semibold text-slate-800 dark:text-white mb-6">Verification Logs</h2>
                     <VerificationTable logs={logs} />
+                </div>
+            )}
+
+            {activeTab === 'security' && (
+                <div className="space-y-6">
+                    <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">
+                        <h2 className="text-xl font-bold text-red-600 dark:text-red-400 mb-4">Offender Blacklist</h2>
+                        <div className="flex gap-4 mb-4">
+                            <input id="bl_id" placeholder="Certificate ID" className="flex-1 p-2 border rounded dark:bg-slate-700 dark:border-slate-600" />
+                            <input id="bl_reason" placeholder="Reason (Optional)" className="flex-1 p-2 border rounded dark:bg-slate-700 dark:border-slate-600" />
+                            <button onClick={async () => {
+                                const id = document.getElementById('bl_id').value;
+                                const reason = document.getElementById('bl_reason').value;
+                                if (!id) return;
+                                const { addToBlacklist } = await import('../api/apiClient');
+                                await addToBlacklist(id, reason);
+                                document.getElementById('bl_id').value = '';
+                                document.getElementById('bl_reason').value = '';
+                                fetchExtraData();
+                            }} className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 font-medium">Add to Blacklist</button>
+                        </div>
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-left border-collapse">
+                                <thead>
+                                    <tr className="border-b dark:border-slate-700"><th className="p-3">Cert ID</th><th className="p-3">Reason</th><th className="p-3">Flagged At</th><th className="p-3">Action</th></tr>
+                                </thead>
+                                <tbody>
+                                    {blacklist.map(b => (
+                                        <tr key={b.id} className="border-b dark:border-slate-700">
+                                            <td className="p-3 font-mono font-bold">{b.cert_id}</td>
+                                            <td className="p-3">{b.reason}</td>
+                                            <td className="p-3">{new Date(b.flagged_at).toLocaleString()}</td>
+                                            <td className="p-3">
+                                                <button onClick={async () => {
+                                                    const { removeFromBlacklist } = await import('../api/apiClient');
+                                                    await removeFromBlacklist(b.cert_id);
+                                                    fetchExtraData();
+                                                }} className="text-blue-500 hover:underline">Remove</button>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                    {blacklist.length === 0 && <tr><td colSpan="4" className="p-4 text-center text-slate-500">No blacklisted entities.</td></tr>}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">
+                        <h2 className="text-xl font-bold text-slate-800 dark:text-white mb-4">System Audit Logs</h2>
+                        <div className="overflow-x-auto max-h-96 overflow-y-auto">
+                            <table className="w-full text-left border-collapse text-sm">
+                                <thead>
+                                    <tr className="border-b dark:border-slate-700 bg-slate-50 dark:bg-slate-900 sticky top-0"><th className="p-3">Timestamp</th><th className="p-3">IP Address</th><th className="p-3">Cert ID</th><th className="p-3">Action</th><th className="p-3">Reason/Verdict</th></tr>
+                                </thead>
+                                <tbody>
+                                    {auditLogs.map(l => (
+                                        <tr key={l.id} className="border-b dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50">
+                                            <td className="p-3">{new Date(l.timestamp).toLocaleString()}</td>
+                                            <td className="p-3 font-mono text-xs">{l.verifier_ip}</td>
+                                            <td className="p-3 font-bold">{l.certificate_id}</td>
+                                            <td className="p-3"><span className="px-2 py-1 rounded bg-slate-200 dark:bg-slate-600 font-mono text-xs">{l.action}</span></td>
+                                            <td className="p-3">{l.reason}</td>
+                                        </tr>
+                                    ))}
+                                    {auditLogs.length === 0 && <tr><td colSpan="5" className="p-4 text-center text-slate-500">No audit logs recorded.</td></tr>}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
             )}
 

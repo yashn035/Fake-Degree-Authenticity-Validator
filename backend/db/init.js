@@ -36,6 +36,16 @@ export const initDB = () => {
                 created_at DATETIME DEFAULT CURRENT_TIMESTAMP
             )
         `;
+        const createAuditLogsTableQuery = `
+            CREATE TABLE IF NOT EXISTS audit_logs (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                certificate_id TEXT,
+                verifier_ip TEXT,
+                action TEXT,
+                reason TEXT,
+                timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+            )
+        `;
         
         db.run(createTableQuery, (err) => {
             if (err) {
@@ -50,8 +60,13 @@ export const initDB = () => {
                         db.run(createUsersTableQuery, (err3) => {
                             if (err3) reject(err3);
                             else {
-                                console.log('Database tables initialized.');
-                                resolve();
+                                db.run(createAuditLogsTableQuery, (err4) => {
+                                    if (err4) reject(err4);
+                                    else {
+                                        console.log('Database tables initialized.');
+                                        resolve();
+                                    }
+                                });
                             }
                         });
                     }

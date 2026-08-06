@@ -1,6 +1,6 @@
 import express from 'express';
 import multer from 'multer';
-import { getVerifications, getTrends, resetSystem, getVerificationById, getBlacklistEntries, addBlacklistEntry, removeBlacklistEntry, getAnalytics, bulkUpload } from '../controllers/adminController.js';
+import { getVerifications, getTrends, resetSystem, getVerificationById, getBlacklistEntries, addBlacklistEntry, removeBlacklistEntry, getAnalytics, bulkUpload, getAuditLogsController } from '../controllers/adminController.js';
 import db from '../models/Certificate.js';
 import { authenticate, authorizeAdmin } from '../middleware/auth.js';
 
@@ -23,6 +23,8 @@ router.get('/export', (req, res) => {
         res.json(rows);
     });
 });
+
+router.get('/audit', getAuditLogsController);
 router.post('/blacklist', addBlacklistEntry);
 router.delete('/blacklist/:certId', removeBlacklistEntry);
 

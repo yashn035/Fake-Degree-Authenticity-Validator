@@ -265,3 +265,13 @@ export const bulkUpload = async (req, res) => {
         res.status(500).json({ error: 'Failed to process bulk upload' });
     }
 };
+
+export const getAuditLogsController = async (req, res) => {
+    try {
+        const { getAuditLogs } = await import('../models/AuditLog.js');
+        const logs = await getAuditLogs();
+        res.json(logs);
+    } catch (err) {
+        res.status(500).json({ error: 'Failed to fetch audit logs' });
+    }
+};
