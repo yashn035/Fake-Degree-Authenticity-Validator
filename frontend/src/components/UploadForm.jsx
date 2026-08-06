@@ -71,6 +71,8 @@ export default function UploadForm({ onResult }) {
           onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
           onDragLeave={() => setIsDragging(false)}
           onDrop={handleDrop}
+          aria-label="File upload dropzone"
+          role="region"
           className={`relative border-2 border-dashed rounded-2xl p-12 text-center transition-all duration-200 ease-in-out ${
             isDragging ? 'border-blue-500 bg-blue-50/50 scale-[1.02]' : 'border-slate-300 hover:border-slate-400 hover:bg-slate-50'
           }`}
@@ -78,6 +80,7 @@ export default function UploadForm({ onResult }) {
           <input
             type="file"
             id="fileInput"
+            aria-label="Choose a certificate file to upload"
             className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
             onChange={(e) => setFile(e.target.files[0])}
             accept="image/*,.pdf"
@@ -85,11 +88,11 @@ export default function UploadForm({ onResult }) {
           
           <div className="pointer-events-none flex flex-col items-center gap-4">
             <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-2">
-              <UploadCloud className="w-8 h-8 text-blue-600" />
+              <UploadCloud className="w-8 h-8 text-blue-600" aria-hidden="true" />
             </div>
             {file ? (
               <div className="flex items-center gap-2 text-slate-700 bg-white px-4 py-2 rounded-full shadow-sm border border-slate-200">
-                <File className="w-4 h-4 text-slate-400" />
+                <File className="w-4 h-4 text-slate-400" aria-hidden="true" />
                 <span className="font-medium truncate max-w-[200px]">{file.name}</span>
               </div>
             ) : (
@@ -102,8 +105,8 @@ export default function UploadForm({ onResult }) {
         </div>
 
         {error && (
-          <div className="p-4 text-sm text-red-600 bg-red-50 rounded-xl border border-red-100 flex items-center gap-2">
-            <X className="w-4 h-4" /> {error}
+          <div role="alert" aria-live="assertive" className="p-4 text-sm text-red-600 bg-red-50 rounded-xl border border-red-100 flex items-center gap-2">
+            <X className="w-4 h-4" aria-hidden="true" /> {error}
           </div>
         )}
 
@@ -113,6 +116,7 @@ export default function UploadForm({ onResult }) {
             id="mockData" 
             checked={useMock} 
             onChange={(e) => setUseMock(e.target.checked)}
+            aria-label="Enable mock data mode for demonstrations"
             className="w-4 h-4 rounded text-blue-600 border-slate-300"
           />
           <label htmlFor="mockData" className="text-sm text-slate-500 cursor-pointer">Use Mock Data (Demo Mode)</label>
@@ -121,6 +125,7 @@ export default function UploadForm({ onResult }) {
         <button
           type="submit"
           disabled={!file}
+          aria-label={file ? "Verify selected certificate" : "Please select a file first"}
           className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white font-semibold py-4 px-6 rounded-xl transition-all shadow-sm flex items-center justify-center gap-2 active:scale-[0.98]"
         >
           Verify Authenticity

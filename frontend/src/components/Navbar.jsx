@@ -59,45 +59,46 @@ export default function Navbar({ darkMode, setDarkMode }) {
         <nav className="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 sticky top-0 z-50 transition-colors">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex justify-between h-16">
-                    <Link to="/" className="flex items-center gap-2">
-                        <ShieldCheck className="w-8 h-8 text-blue-600 dark:text-blue-400" />
+                    <Link to="/" aria-label="Go to homepage" className="flex items-center gap-2">
+                        <ShieldCheck className="w-8 h-8 text-blue-600 dark:text-blue-400" aria-hidden="true" />
                         <span className="font-bold text-xl text-slate-800 dark:text-white">EduVerify AI</span>
                     </Link>
                     <div className="flex items-center space-x-6">
-                        <button onClick={() => setDarkMode(!darkMode)} className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">
-                            {darkMode ? <Sun className="w-5 h-5 text-amber-400" /> : <Moon className="w-5 h-5 text-slate-600" />}
+                        <button aria-label={darkMode ? "Switch to light mode" : "Switch to dark mode"} onClick={() => setDarkMode(!darkMode)} className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">
+                            {darkMode ? <Sun className="w-5 h-5 text-amber-400" aria-hidden="true" /> : <Moon className="w-5 h-5 text-slate-600" aria-hidden="true" />}
                         </button>
                         
                         {!user ? (
-                            <>
-                                <Link to="/dashboard" className="text-slate-600 dark:text-slate-300 hover:text-blue-600 font-medium transition-colors">Verify Certificate</Link>
-                                <Link to="/login" className="text-slate-600 dark:text-slate-300 hover:text-blue-600 font-medium transition-colors">Login</Link>
-                                <Link to="/signup" className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">Sign Up</Link>
-                            </>
+                            <nav aria-label="Main navigation">
+                                <Link to="/dashboard" aria-label="Verify Certificate" className="text-slate-600 dark:text-slate-300 hover:text-blue-600 font-medium transition-colors mr-6">Verify Certificate</Link>
+                                <Link to="/login" aria-label="Login to account" className="text-slate-600 dark:text-slate-300 hover:text-blue-600 font-medium transition-colors mr-6">Login</Link>
+                                <Link to="/signup" aria-label="Sign up for an account" className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">Sign Up</Link>
+                            </nav>
                         ) : (
                             <>
-                                <Link to="/dashboard" className="text-slate-600 dark:text-slate-300 hover:text-blue-600 font-medium transition-colors">Dashboard</Link>
+                                <Link to="/dashboard" aria-label="Go to Dashboard" className="text-slate-600 dark:text-slate-300 hover:text-blue-600 font-medium transition-colors">Dashboard</Link>
                                 {user.role === 'admin' && (
                                     <>
                                         <button 
                                             onClick={toggleVoiceDemo}
+                                            aria-label={isSpeaking ? "Stop voice demonstration" : "Start voice demonstration"}
                                             className={`flex items-center gap-2 font-bold transition-all px-3 py-1.5 rounded-lg border ${
                                                 isSpeaking 
                                                 ? 'bg-purple-600 text-white border-purple-600 shadow-[0_0_15px_rgba(147,51,234,0.5)] animate-pulse' 
                                                 : 'text-purple-600 dark:text-purple-400 hover:text-purple-800 hover:bg-purple-100 bg-purple-50 dark:bg-purple-900/20 border-purple-200 dark:border-purple-800'
                                             }`}
                                         >
-                                            {isSpeaking ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
+                                            {isSpeaking ? <MicOff className="w-4 h-4" aria-hidden="true" /> : <Mic className="w-4 h-4" aria-hidden="true" />}
                                             {isSpeaking ? 'Stop Demo' : 'Voice Demo'}
                                         </button>
-                                        <Link to="/admin" className="text-slate-600 dark:text-slate-300 hover:text-blue-600 font-medium transition-colors">Admin Panel</Link>
+                                        <Link to="/admin" aria-label="Go to Admin Panel" className="text-slate-600 dark:text-slate-300 hover:text-blue-600 font-medium transition-colors">Admin Panel</Link>
                                         <NotificationBell />
                                     </>
                                 )}
                                 <div className="flex items-center gap-4 ml-4 pl-4 border-l border-slate-200 dark:border-slate-700">
-                                    <span className="text-sm font-medium text-slate-500 dark:text-slate-400">{user.fullName}</span>
-                                    <button onClick={handleLogout} className="text-slate-500 hover:text-red-500 transition-colors" title="Logout">
-                                        <LogOut className="w-5 h-5" />
+                                    <span className="text-sm font-medium text-slate-500 dark:text-slate-400" aria-label="Logged in as">{user.fullName}</span>
+                                    <button onClick={handleLogout} aria-label="Log out" className="text-slate-500 hover:text-red-500 transition-colors" title="Logout">
+                                        <LogOut className="w-5 h-5" aria-hidden="true" />
                                     </button>
                                 </div>
                             </>

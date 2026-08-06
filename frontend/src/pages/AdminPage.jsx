@@ -132,9 +132,13 @@ export default function AdminPage() {
                 </div>
             </div>
 
-            <div className="flex space-x-2 overflow-x-auto pb-2 border-b border-slate-200 dark:border-slate-700">
+            <div role="tablist" aria-label="Admin Dashboard Tabs" className="flex space-x-2 overflow-x-auto pb-2 border-b border-slate-200 dark:border-slate-700">
                 {tabs.map(tab => (
                     <button key={tab.id} onClick={() => setActiveTab(tab.id)}
+                        role="tab"
+                        aria-selected={activeTab === tab.id}
+                        aria-controls={`panel-${tab.id}`}
+                        id={`tab-${tab.id}`}
                         className={`px-4 py-2 rounded-lg font-medium whitespace-nowrap transition-colors ${activeTab === tab.id ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'}`}>
                         {tab.label}
                     </button>
@@ -146,10 +150,10 @@ export default function AdminPage() {
                     <div className="flex justify-between items-center">
                         <h2 className="text-xl font-bold text-slate-800 dark:text-white">Fraud Intelligence & Analytics</h2>
                         <div className="flex gap-2">
-                            <button onClick={fetchExtraData} className="px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg flex items-center gap-2 hover:bg-slate-50 dark:hover:bg-slate-700 shadow-sm text-sm">
-                                <RefreshCw className="w-4 h-4 text-slate-500" /> Refresh
+                            <button aria-label="Refresh Analytics Data" onClick={fetchExtraData} className="px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg flex items-center gap-2 hover:bg-slate-50 dark:hover:bg-slate-700 shadow-sm text-sm">
+                                <RefreshCw className="w-4 h-4 text-slate-500" aria-hidden="true" /> Refresh
                             </button>
-                            <button onClick={async () => {
+                            <button aria-label="Export Analytics Report" onClick={async () => {
                                 try {
                                     const { exportData } = await import('../api/apiClient');
                                     const data = await exportData();
@@ -163,7 +167,7 @@ export default function AdminPage() {
                                     alert('Export failed');
                                 }
                             }} className="px-3 py-2 bg-blue-600 text-white rounded-lg flex items-center gap-2 hover:bg-blue-700 shadow-sm text-sm font-medium">
-                                <Download className="w-4 h-4" /> Export Report
+                                <Download className="w-4 h-4" aria-hidden="true" /> Export Report
                             </button>
                         </div>
                     </div>
@@ -241,9 +245,9 @@ export default function AdminPage() {
                     <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-100 dark:border-slate-700">
                         <h2 className="text-lg font-bold mb-4">Issue New Certificate (On-Chain)</h2>
                         <form onSubmit={handleIssue} className="space-y-4">
-                            <input placeholder="Cert ID (e.g. C101)" required className="w-full p-2 border rounded dark:bg-slate-700" value={certData.certId} onChange={e=>setCertData({...certData, certId: e.target.value})} />
-                            <input placeholder="Student Name" required className="w-full p-2 border rounded dark:bg-slate-700" value={certData.studentName} onChange={e=>setCertData({...certData, studentName: e.target.value})} />
-                            <button type="submit" disabled={mining} className="w-full bg-indigo-600 text-white p-2 rounded hover:bg-indigo-700 disabled:opacity-50">
+                            <input aria-label="Certificate ID" placeholder="Cert ID (e.g. C101)" required className="w-full p-2 border rounded dark:bg-slate-700" value={certData.certId} onChange={e=>setCertData({...certData, certId: e.target.value})} />
+                            <input aria-label="Student Name" placeholder="Student Name" required className="w-full p-2 border rounded dark:bg-slate-700" value={certData.studentName} onChange={e=>setCertData({...certData, studentName: e.target.value})} />
+                            <button type="submit" disabled={mining} aria-label={mining ? "Mining block" : "Mint Certificate"} className="w-full bg-indigo-600 text-white p-2 rounded hover:bg-indigo-700 disabled:opacity-50">
                                 {mining ? '⛏️ Mining Block...' : 'Mint Certificate'}
                             </button>
                         </form>
@@ -307,7 +311,7 @@ export default function AdminPage() {
                     <h2 className="text-lg font-bold mb-4">Bulk Import Certificates (CSV)</h2>
                     <p className="text-sm text-slate-500 mb-6">Upload a CSV file with headers: <code>cert_id, student_name, institution, course, year, marks, issue_date</code>.</p>
                     <div className="border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-xl p-8 text-center hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
-                        <input type="file" accept=".csv" onChange={async (e) => {
+                        <input type="file" aria-label="Upload CSV file for bulk import" accept=".csv" onChange={async (e) => {
                             const file = e.target.files[0];
                             if (!file) return;
                             const formData = new FormData();
